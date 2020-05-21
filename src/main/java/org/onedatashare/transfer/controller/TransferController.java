@@ -1,7 +1,7 @@
 package org.onedatashare.transfer.controller;
 
 import org.onedatashare.transfer.model.error.CredentialNotFoundException;
-import org.onedatashare.transfer.model.request.TransferJobRequest;
+import org.onedatashare.transfer.model.request.TransferJobRequestWithMetaData;
 import org.onedatashare.transfer.service.TransferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class TransferController {
      * @return Mono\<Job\>
      */
     @PostMapping
-    public Mono<Void> start(@RequestBody TransferJobRequest request) {
+    public Mono<Void> start(@RequestBody TransferJobRequestWithMetaData request) {
         return transferService.submit(request);
     }
 

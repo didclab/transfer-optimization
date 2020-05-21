@@ -22,5 +22,6 @@ public class SftpResource extends VfsResource {
             DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(this.fileSystemOptions, auth);
         }
         this.fileSystemManager = VFS.getManager();
+        this.fileSystemManager.setLogger(null);
     }
 }
