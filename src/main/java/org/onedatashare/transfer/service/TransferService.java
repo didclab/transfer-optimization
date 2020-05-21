@@ -27,9 +27,6 @@ public class TransferService {
     @Autowired
     private CredentialService credentialService;
 
-//    @Autowired
-//    TransferDetailsRepository transferDetailsRepository;
-
     private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
 
     public Mono<? extends EndpointCredential> getEndpointCredential(String userId, EndpointType type, String credId) {
