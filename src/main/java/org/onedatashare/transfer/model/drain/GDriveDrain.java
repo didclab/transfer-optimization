@@ -16,6 +16,7 @@ public class GDriveDrain implements Drain {
     private ByteArrayOutputStream chunk = new ByteArrayOutputStream();
     private long size = 0;
     private String resumableSessionURL;
+    private String parentId;
 
     private static final Logger logger = LoggerFactory.getLogger(GDriveDrain.class);
 
@@ -23,7 +24,7 @@ public class GDriveDrain implements Drain {
 
     private GDriveDrain(){}
 
-    public static GDriveDrain initialize(String token) throws Exception{
+    public static GDriveDrain initialize(String token, String name, String parentId) throws Exception{
         GDriveDrain driveDrain = new GDriveDrain();
         try{
             URL url = new URL(UPLOAD_URL);
@@ -33,7 +34,12 @@ public class GDriveDrain implements Drain {
             request.setDoOutput(true);
             request.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + token);
             request.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
-            String body = ""; //changed
+            String body;
+            if(parentId !=null){
+                body = "{\"name\": \"" + name + "\", \"parents\": [\"" + parentId + "\"]}";
+            }else{
+                body = "{\"name\": \"" + name + "\"}";
+            }
             request.setRequestProperty(HttpHeaders.CONTENT_LENGTH, String.format(Locale.ENGLISH, "%d", body.getBytes().length));
 
             OutputStream outputStream = request.getOutputStream();
@@ -67,7 +73,7 @@ public class GDriveDrain implements Drain {
             request.setConnectTimeout(10000);
             request.setRequestProperty(HttpHeaders.CONTENT_LENGTH, Long.toString(sizeUploading));
             request.setRequestProperty(HttpHeaders.CONTENT_RANGE,
-                    String.format("bytes %l-%l/*", size ,(size + sizeUploading - 1)));
+                    String.format("bytes %d-%d/*", size ,(size + sizeUploading - 1)));
             request.setDoOutput(true);
             OutputStream outputStream = request.getOutputStream();
             outputStream.write(chunk.toByteArray(), 0, sizeUploading);

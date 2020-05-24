@@ -19,8 +19,9 @@ public class VfsResource extends Resource {
 
     @Override
     public Tap getTap(EntityInfo baseInfo, EntityInfo relativeInfo) throws Exception {
-        FileObject fileObject = fileSystemManager.resolveFile(baseInfo.getPath() + relativeInfo.getPath(), this.fileSystemOptions);
-        if(fileObject.isFile() != true){
+        FileObject fileObject = fileSystemManager.resolveFile(baseInfo.getPath() + relativeInfo.getPath(),
+                this.fileSystemOptions);
+        if(fileObject.getType() != FileType.FILE){
             throw new NotAFileException();
         }
         FileContent content = fileObject.getContent();

@@ -1,5 +1,7 @@
 package org.onedatashare.transfer.config;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -8,8 +10,11 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.MemoryDataStoreFactory;
+import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import lombok.Data;
+import org.onedatashare.transfer.model.credential.OAuthEndpointCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,27 +26,19 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
-@Configuration
 @Data
 public class GDriveConfig {
     private static final Logger logger = LoggerFactory.getLogger(GDriveConfig.class);
 
-    @Value("${gdrive.appName}")
     private String appName;
-    @Value("${gdrive.authUri}")
     private String authUri;
-    @Value("${gdrive.tokenUri}")
     private String tokenUri;
-    @Value("${gdrive.authProviderUri}")
     private String authProviderX509CertUrl;
-    @Value("${gdrive.redirectUri}")
     private String redirectUri;
-    @Value("${gdrive.clientId}")
     private String clientId;
-    @Value("${gdrive.clientSecret}")
     private String clientSecret;
-    @Value("${gdrive.projectId}")
     private String projectId;
 
     private GoogleClientSecrets clientSecrets;
@@ -56,7 +53,6 @@ public class GDriveConfig {
     public final static String APPROVAL_PROMPT = "force";
 
     private static String getValueFromResourceString(String str){
-
         if(str == null){
             return null;
         }
@@ -81,7 +77,7 @@ public class GDriveConfig {
         return null;
     }
 
-    private GDriveConfig(boolean b){
+    public GDriveConfig(){
         ResourceBundle resource = ResourceBundle.getBundle("application");
         this.appName = getValueFromResourceString(resource.getString("gdrive.appName"));
         this.authUri = getValueFromResourceString(resource.getString("gdrive.authUri"));
@@ -106,39 +102,9 @@ public class GDriveConfig {
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             flow = new GoogleAuthorizationCodeFlow.Builder(
                     httpTransport, jsonFactory, clientSecrets, SCOPES)
+                    .setDataStoreFactory(MemoryDataStoreFactory.getDefaultInstance())
                     .setAccessType(ACCESS_TYPE)
                     .setApprovalPrompt(APPROVAL_PROMPT)
-                    .build();
-        } catch (IOException | GeneralSecurityException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public GDriveConfig(){}
-
-    public static GDriveConfig getInstance(){
-        //Overloading the constructor
-        return new GDriveConfig(false);
-    }
-
-    @PostConstruct
-    public void initialize() {
-        GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
-                .setAuthUri(authUri)
-                .setRedirectUris(Arrays.asList(redirectUri))
-                .setTokenUri(tokenUri)
-                .setClientId(clientId)
-                .setClientSecret(clientSecret);
-
-        clientSecrets = new GoogleClientSecrets()
-                .setInstalled(details);
-
-        try {
-            httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            flow = new GoogleAuthorizationCodeFlow.Builder(
-                    httpTransport, jsonFactory, clientSecrets, SCOPES)
-                    .setApprovalPrompt(APPROVAL_PROMPT)
-                    .setAccessType(ACCESS_TYPE)
                     .build();
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
@@ -160,6 +126,18 @@ public class GDriveConfig {
                 }
             }
         };
+    }
+
+    public Drive getDriveService(OAuthEndpointCredential credential) throws IOException {
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(credential.getToken());
+        tokenResponse.setRefreshToken(credential.getRefreshToken());
+        tokenResponse.setFactory(JacksonFactory.getDefaultInstance());
+        Credential cred = this.getFlow().createAndStoreCredential(tokenResponse, String.valueOf(UUID.randomUUID()));
+        return new Drive.Builder(
+                this.getHttpTransport(), this.getJsonFactory(), setHttpTimeout(cred))
+                .setApplicationName(this.getAppName())
+                .build();
     }
 
 }
