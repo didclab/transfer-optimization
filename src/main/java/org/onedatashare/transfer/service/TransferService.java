@@ -1,6 +1,7 @@
 package org.onedatashare.transfer.service;
 
 import lombok.SneakyThrows;
+import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.core.*;
 import org.onedatashare.transfer.model.credential.EndpointCredential;
 import org.onedatashare.transfer.model.request.TransferJobRequest;
@@ -11,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.core.Authentication;
 //import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -26,8 +30,10 @@ import static org.onedatashare.transfer.model.credential.CredentialConstants.*;
 public class TransferService {
     @Autowired
     private CredentialService credentialService;
-
     private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
+
+    @Autowired
+    private SaveToRedis saveToRedis;
 
     public Mono<? extends EndpointCredential> getEndpointCredential(String userId, EndpointType type, String credId) {
         if (ACCOUNT_CRED_TYPE.contains(type)) {
@@ -60,7 +66,9 @@ public class TransferService {
 
     public Mono<Void> submit(TransferJobRequestWithMetaData request) {
         logger.info("In submit Function");
-//        transferDetailsRepository.saveAll(Flux.just(new TransferDetails(Transfer.fName,12l))).subscribe();
+        saveToRedis.save(new TransferDetails("abc", "duration"));
+        logger.info("Saved in redis");
+
         return Mono.just(request.getOwnerId())
                 .flatMap(ownerId -> {
                     logger.info("Setting credential");

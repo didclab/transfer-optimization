@@ -2,6 +2,7 @@ package org.onedatashare.transfer.service;
 
 import lombok.NoArgsConstructor;
 import org.apache.commons.vfs2.FileSystemManager;
+import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.core.EntityInfo;
 import org.onedatashare.transfer.model.core.Slice;
 import org.onedatashare.transfer.model.drain.Drain;
@@ -11,10 +12,13 @@ import org.onedatashare.transfer.model.util.Progress;
 import org.onedatashare.transfer.model.util.Throughput;
 import org.onedatashare.transfer.model.util.Time;
 import org.onedatashare.transfer.model.util.TransferInfo;
+//import org.onedatashare.transfer.repository.TransferReportRepository;
 import org.onedatashare.transfer.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -43,6 +47,9 @@ public class Transfer<S extends Resource, D extends Resource> {
     private ArrayList<Disposable> disposableArrayList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Transfer.class);
 
+//    @Autowired
+//    private SaveToRedis saveToRedis;
+
     /**
      * Periodically updated information about the ongoing transfer.
      */
@@ -63,6 +70,7 @@ public class Transfer<S extends Resource, D extends Resource> {
 
     public Flux start(int sliceSize) {
         logger.info("Within transfer start");
+//        saveToRedis.save(new TransferDetails("abc", "duration"));
         return Flux.fromIterable(this.filesToTransfer)
                 .doOnSubscribe(s -> {
                     logger.info("Transfer started....");
