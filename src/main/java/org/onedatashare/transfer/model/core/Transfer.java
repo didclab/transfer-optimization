@@ -119,9 +119,10 @@ public class Transfer<S extends Resource, D extends Resource> {
                     logger.info("Done transferring " + this.id + ". Took " + startTime / 1000 + " secs");
                 })
                 .map(__ -> {
-                    transferReportRepository.save(new TransferDetails("abc",123l));
+                    transferReportRepository.save(new TransferDetails("abc", 123l));
                     return Flux.empty();
                 });
+    }
 
     public int setParallelism() {
         int parallelism = 2;
