@@ -35,7 +35,8 @@ public class ApplicationSecurityConfig {
                 //Permit all the HTTP methods
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 //Need authentication for APICalls
-                .pathMatchers("/**").authenticated()
+                .pathMatchers("/api/**").authenticated()
+                .pathMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v3/api-docs/**","/webjars/**").permitAll()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(this::authenticationFailedHandler).accessDeniedHandler(this::accessDeniedHandler)
