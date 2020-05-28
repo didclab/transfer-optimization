@@ -14,6 +14,6 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class TransferDetails implements Serializable {
 
-    String fileName;
+    String requestId;
     String duration;
 }

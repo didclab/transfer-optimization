@@ -17,12 +17,12 @@ public class SaveToRedis {
         this.redisOperations = redisOperations;
     }
 
-    public void save(TransferDetails transferDetails){
-        factory.getReactiveConnection().serverCommands().flushAll().thenMany(
-                Flux.just(transferDetails.getFileName())
-                        .map(name -> new TransferDetails(name, "duration"))
-                        .flatMap(td -> redisOperations.opsForValue().set(td.getFileName(), td)))
-                .thenMany(redisOperations.keys("*")
+    public void save(TransferDetails transferDetails) {
+        factory.getReactiveConnection().serverCommands().save().thenMany(
+                Flux.just(transferDetails)
+                        .map(tdd -> new TransferDetails(tdd.getRequestId(), tdd.getDuration()))
+                        .flatMap(td -> redisOperations.opsForValue().set(td.getRequestId(), td)))
+                .thenMany(redisOperations.keys(transferDetails.getRequestId())
                         .flatMap(redisOperations.opsForValue()::get))
                 .subscribe(System.out::println);
     }

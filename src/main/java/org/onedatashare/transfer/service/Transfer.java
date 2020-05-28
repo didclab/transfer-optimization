@@ -16,9 +16,6 @@ import org.onedatashare.transfer.model.util.TransferInfo;
 import org.onedatashare.transfer.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -41,14 +38,18 @@ public class Transfer<S extends Resource, D extends Resource> {
     private TransferOptions options;
     private EntityInfo sourceInfo;
     private EntityInfo destinationInfo;
+    private SaveToRedis saveToRedis;
+
+    public void setredis(SaveToRedis str){
+        this.saveToRedis = str;
+    }
 
     private AtomicInteger concurrency = new AtomicInteger(5);
 
     private ArrayList<Disposable> disposableArrayList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Transfer.class);
 
-//    @Autowired
-//    private SaveToRedis saveToRedis;
+
 
     /**
      * Periodically updated information about the ongoing transfer.
@@ -70,13 +71,11 @@ public class Transfer<S extends Resource, D extends Resource> {
 
     public Flux start(int sliceSize) {
         logger.info("Within transfer start");
-//        saveToRedis.save(new TransferDetails("abc", "duration"));
         return Flux.fromIterable(this.filesToTransfer)
                 .doOnSubscribe(s -> {
                     logger.info("Transfer started....");
                     this.startTime = Time.now();
                 })
-
                 .parallel(setParallelism())
                 .runOn(Schedulers.elastic())
                 .flatMap(file -> {
@@ -120,6 +119,10 @@ public class Transfer<S extends Resource, D extends Resource> {
                 .doOnComplete(() -> {
                     this.startTime = Time.now() - this.startTime;
                     logger.info("Done transferring " + this.id + ". Took " + startTime / 1000 + " secs");
+                    TransferDetails td = new TransferDetails();
+                    td.setDuration(startTime+"ms");
+                    td.setRequestId(this.id);
+                    saveToRedis.save(td);
 
                 });
     }
@@ -158,6 +161,7 @@ public class Transfer<S extends Resource, D extends Resource> {
         info.update(timer, progress, throughput);
         return info;
     }
+
 
     public String getId() {
         return id;

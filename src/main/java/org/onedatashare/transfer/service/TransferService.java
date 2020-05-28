@@ -1,6 +1,7 @@
 package org.onedatashare.transfer.service;
 
 import lombok.SneakyThrows;
+import org.apache.commons.lang.RandomStringUtils;
 import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.core.*;
 import org.onedatashare.transfer.model.credential.EndpointCredential;
@@ -30,6 +31,7 @@ import static org.onedatashare.transfer.model.credential.CredentialConstants.*;
 public class TransferService {
     @Autowired
     private CredentialService credentialService;
+
     private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
 
     @Autowired
@@ -65,10 +67,8 @@ public class TransferService {
     }
 
     public Mono<Void> submit(TransferJobRequestWithMetaData request) {
+        request.setId(RandomStringUtils.randomAlphanumeric(6));
         logger.info("In submit Function");
-        saveToRedis.save(new TransferDetails("abc", "duration"));
-        logger.info("Saved in redis");
-
         return Mono.just(request.getOwnerId())
                 .flatMap(ownerId -> {
                     logger.info("Setting credential");
@@ -96,7 +96,6 @@ public class TransferService {
                         ftt.add(nei);
                     }
 
-
                     EntityInfo ed = new EntityInfo();
                     ed.setId(request.getDestination().getInfo().getId());
                     ed.setPath(request.getDestination().getInfo().getPath());
@@ -106,6 +105,7 @@ public class TransferService {
                     transfer.setSourceInfo(es);
                     transfer.setDestinationInfo(ed);
                     transfer.setFilesToTransfer(ftt);
+                    transfer.setredis(saveToRedis);
                     logger.info("Starting Start...");
                     transfer.start(TRANSFER_SLICE_SIZE).subscribeOn(Schedulers.elastic()).subscribe();
                 })
