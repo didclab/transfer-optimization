@@ -36,6 +36,9 @@ public class TransferService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
 
+    HazelcastInstance hz = HazelcastClient.newHazelcastClient();
+    IMap<String, TransferDetails> map = hz.getMap("Map2");
+
     public Mono<? extends EndpointCredential> getEndpointCredential(String userId, EndpointType type, String credId) {
         if (ACCOUNT_CRED_TYPE.contains(type)) {
             return credentialService.fetchAccountCredential(userId, type, credId);
@@ -67,12 +70,11 @@ public class TransferService {
 
     public Mono<Void> submit(TransferJobRequestWithMetaData request) {
         request.setId(RandomStringUtils.randomAlphanumeric(6));
-        ClientConfig config = new ClientConfig();
-        GroupConfig groupConfig = config.getGroupConfig();
-        groupConfig.setName("dev");
-//        groupConfig.setPassword("dev-pass");
-        HazelcastInstance hz = HazelcastClient.newHazelcastClient(config);
-        IMap<String, TransferDetails> map = hz.getMap("Map2");
+//        ClientConfig config = new ClientConfig();
+//        GroupConfig groupConfig = config.getGroupConfig();
+//        groupConfig.setName("dev");
+//        HazelcastInstance hz = HazelcastClient.newHazelcastClient(config);
+//        IMap<String, TransferDetails> map = hz.getMap("Map2");
 
         logger.info("In submit Function");
         return Mono.just(request.getOwnerId())
