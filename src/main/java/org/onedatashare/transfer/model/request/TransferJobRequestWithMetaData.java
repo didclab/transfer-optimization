@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang.RandomStringUtils;
 import org.onedatashare.transfer.model.core.EndpointType;
 import org.onedatashare.transfer.model.core.EntityInfo;
 
@@ -27,7 +28,7 @@ public class TransferJobRequestWithMetaData{
         requestWithMetaData.source = request.getSource();
         requestWithMetaData.destination = request.getDestination();
         requestWithMetaData.options = request.getOptions();
-        requestWithMetaData.id = "100";
+        requestWithMetaData.id = RandomStringUtils.randomAlphanumeric(6);
         return requestWithMetaData;
     }
 }

@@ -1,7 +1,9 @@
 package org.onedatashare.transfer.service;
 
+import com.hazelcast.core.IMap;
 import lombok.NoArgsConstructor;
 import org.apache.commons.vfs2.FileSystemManager;
+import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.core.EntityInfo;
 import org.onedatashare.transfer.model.core.Slice;
 import org.onedatashare.transfer.model.drain.Drain;
@@ -37,6 +39,16 @@ public class Transfer<S extends Resource, D extends Resource> {
     private TransferOptions options;
     private EntityInfo sourceInfo;
     private EntityInfo destinationInfo;
+
+    public IMap getMap() {
+        return map;
+    }
+
+    public void setMap(IMap map) {
+        this.map = map;
+    }
+
+    private IMap map;
 
     private AtomicInteger concurrency = new AtomicInteger(5);
 
@@ -112,7 +124,8 @@ public class Transfer<S extends Resource, D extends Resource> {
                 .doOnComplete(() -> {
                     this.startTime = Time.now() - this.startTime;
                     logger.info("Done transferring " + this.id + ". Took " + startTime / 1000 + " secs");
-
+                    map.put(this.id, new TransferDetails(this.id,startTime+""));
+                    System.out.println(map.get(this.id));
                 });
     }
 

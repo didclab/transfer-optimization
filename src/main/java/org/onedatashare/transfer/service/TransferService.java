@@ -1,6 +1,13 @@
 package org.onedatashare.transfer.service;
 
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.config.GroupConfig;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.core.IMap;
 import lombok.SneakyThrows;
+import org.apache.commons.lang.RandomStringUtils;
+import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.core.*;
 import org.onedatashare.transfer.model.credential.EndpointCredential;
 import org.onedatashare.transfer.model.request.TransferJobRequest;
@@ -59,8 +66,15 @@ public class TransferService {
     }
 
     public Mono<Void> submit(TransferJobRequestWithMetaData request) {
+        request.setId(RandomStringUtils.randomAlphanumeric(6));
+        ClientConfig config = new ClientConfig();
+        GroupConfig groupConfig = config.getGroupConfig();
+        groupConfig.setName("dev");
+//        groupConfig.setPassword("dev-pass");
+        HazelcastInstance hz = HazelcastClient.newHazelcastClient(config);
+        IMap<String, TransferDetails> map = hz.getMap("Map2");
+
         logger.info("In submit Function");
-//        transferDetailsRepository.saveAll(Flux.just(new TransferDetails(Transfer.fName,12l))).subscribe();
         return Mono.just(request.getOwnerId())
                 .flatMap(ownerId -> {
                     logger.info("Setting credential");
@@ -98,6 +112,7 @@ public class TransferService {
                     transfer.setSourceInfo(es);
                     transfer.setDestinationInfo(ed);
                     transfer.setFilesToTransfer(ftt);
+                    transfer.setMap(map);
                     logger.info("Starting Start...");
                     transfer.start(TRANSFER_SLICE_SIZE).subscribeOn(Schedulers.elastic()).subscribe();
                 })
