@@ -1,22 +1,16 @@
 package org.onedatashare.transfer.model.core;
 
-import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import org.apache.commons.vfs2.FileContent;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.onedatashare.transfer.model.TransferDetails;
 import org.onedatashare.transfer.model.drain.Drain;
-import org.onedatashare.transfer.model.error.transfer.NotAFileException;
 import org.onedatashare.transfer.model.request.TransferOptions;
 import org.onedatashare.transfer.model.tap.Tap;
 import org.onedatashare.transfer.model.util.Progress;
 import org.onedatashare.transfer.model.util.Throughput;
 import org.onedatashare.transfer.model.util.Time;
 import org.onedatashare.transfer.model.util.TransferInfo;
-import org.onedatashare.transfer.repository.TransferDetailsRepository;
+import org.onedatashare.transfer.repository.TransferReportRepository;
 import org.onedatashare.transfer.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +20,9 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.nio.file.Files;
 
 
 @NoArgsConstructor
@@ -53,6 +44,8 @@ public class Transfer<S extends Resource, D extends Resource> {
     private ArrayList<Disposable> disposableArrayList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Transfer.class);
 
+    private TransferReportRepository transferReportRepository;
+
     /**
      * Periodically updated information about the ongoing transfer.
      */
@@ -63,9 +56,6 @@ public class Transfer<S extends Resource, D extends Resource> {
     private long startTime;
     private Progress progress = new Progress();
     private Throughput throughput = new Throughput();
-
-    @Autowired
-    TransferDetailsRepository transferDetailsRepository;
 
     public Transfer(S source, D destination) {
         this.source = source;
@@ -127,7 +117,10 @@ public class Transfer<S extends Resource, D extends Resource> {
                 .doOnComplete(() -> {
                     this.startTime = Time.now() - this.startTime;
                     logger.info("Done transferring " + this.id + ". Took " + startTime / 1000 + " secs");
-
+                })
+                .map(__ -> {
+                    transferReportRepository.save(new TransferDetails("abc", 123l));
+                    return Flux.empty();
                 });
     }
 
