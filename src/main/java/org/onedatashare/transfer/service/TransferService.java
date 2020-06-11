@@ -57,6 +57,8 @@ public class TransferService {
                 return new GDriveResource(cred);
             case sftp:
                 return new SftpResource(cred);
+            case s3:
+                return new S3Resource(cred);
             default:
                 return null;
         }
