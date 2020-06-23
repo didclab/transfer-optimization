@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class CredentialService {
     private WebClient client;
 
-    @Value("${cred.service.uri}")
+    @Value("${cred.service.url}")
     private String credentialServiceUrl;
     private static final int TIMEOUT_IN_MILLIS = 10000;
 

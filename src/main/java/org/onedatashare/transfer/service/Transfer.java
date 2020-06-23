@@ -11,6 +11,7 @@ import org.onedatashare.transfer.model.util.Progress;
 import org.onedatashare.transfer.model.util.Throughput;
 import org.onedatashare.transfer.model.util.Time;
 import org.onedatashare.transfer.model.util.TransferInfo;
+import org.onedatashare.transfer.repository.TransferReportRepository;
 import org.onedatashare.transfer.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,8 @@ public class Transfer<S extends Resource, D extends Resource> {
 
     private ArrayList<Disposable> disposableArrayList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Transfer.class);
+
+    private TransferReportRepository transferReportRepository;
 
     /**
      * Periodically updated information about the ongoing transfer.
@@ -112,7 +115,6 @@ public class Transfer<S extends Resource, D extends Resource> {
                 .doOnComplete(() -> {
                     this.startTime = Time.now() - this.startTime;
                     logger.info("Done transferring " + this.id + ". Took " + startTime / 1000 + " secs");
-
                 });
     }
 

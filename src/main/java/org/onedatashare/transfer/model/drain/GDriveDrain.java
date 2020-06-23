@@ -113,12 +113,9 @@ public class GDriveDrain implements Drain {
             outputStream.close();
             request.connect();
             if(request.getResponseCode() == 200 || request.getResponseCode() == 201){
-//                    ODSLoggerService.logDebug("code: " + request.getResponseCode()+
-//                            ", message: "+ request.getResponseMessage());
+
             }else {
-//                    ODSLoggerService.logDebug("code: " + request.getResponseCode()+
-//                            ", message: "+ request.getResponseMessage());
-//                    ODSLoggerService.logDebug("fail");
+
             }
         }catch (Exception e) {
             e.printStackTrace();

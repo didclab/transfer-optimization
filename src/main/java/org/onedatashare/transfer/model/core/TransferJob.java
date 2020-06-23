@@ -4,7 +4,6 @@ package org.onedatashare.transfer.model.core;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.onedatashare.transfer.model.request.TransferJobRequest;
-import org.onedatashare.transfer.model.request.TransferJobRequestWithMetaData;
 import org.onedatashare.transfer.model.util.Time;
 import org.onedatashare.transfer.model.util.Times;
 import org.onedatashare.transfer.model.util.TransferInfo;
