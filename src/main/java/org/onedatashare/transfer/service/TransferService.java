@@ -28,7 +28,7 @@ public class TransferService {
     @Autowired
     private CredentialService credentialService;
 
-    private TransferReportRepository transferReportRepository;
+    //private TransferReportRepository transferReportRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
 

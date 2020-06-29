@@ -1,11 +1,14 @@
 package org.onedatashare.transfer.controller;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import org.onedatashare.transfer.model.error.CredentialNotFoundException;
 import org.onedatashare.transfer.model.request.TransferJobRequest;
 import org.onedatashare.transfer.service.TransferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

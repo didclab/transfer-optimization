@@ -6,7 +6,8 @@ import org.onedatashare.transfer.model.core.EndpointType;
 import org.onedatashare.transfer.model.credential.AccountEndpointCredential;
 import org.onedatashare.transfer.model.credential.OAuthEndpointCredential;
 import org.onedatashare.transfer.model.error.CredentialNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,14 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class CredentialService {
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
     private WebClient client;
 
-    @Value("${cred.service.url}")
-    private String credentialServiceUrl;
+//    @Value("${cred.service.url}")
+//    private String credentialServiceUrl= discoveryClient.getInstances("Endpoint_Credential_Service").get(0).getUri()+"/endpoint-cred";
     private static final int TIMEOUT_IN_MILLIS = 10000;
 
     @PostConstruct
@@ -42,6 +47,7 @@ public class CredentialService {
     }
 
     private WebClient.ResponseSpec fetchCredential(String userId, EndpointType type, String credId){
+        String credentialServiceUrl= discoveryClient.getInstances("Endpoint_Credential_Service").get(0).getUri()+"/endpoint-cred";
         return client.get()
                 .uri(URI.create(String.format("%s/%s/%s/%s",credentialServiceUrl, userId, type, credId)))
                 .retrieve()
