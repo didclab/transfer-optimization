@@ -15,7 +15,6 @@ import org.onedatashare.transfer.repository.TransferReportRepository;
 import org.onedatashare.transfer.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -39,7 +38,7 @@ public class Transfer<S extends Resource, D extends Resource> {
     private EntityInfo sourceInfo;
     private EntityInfo destinationInfo;
 
-    private AtomicInteger concurrency = new AtomicInteger(5);
+    //private AtomicInteger concurrency = new AtomicInteger(5);
 
     private ArrayList<Disposable> disposableArrayList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Transfer.class);
@@ -62,7 +61,7 @@ public class Transfer<S extends Resource, D extends Resource> {
         this.destination = destination;
     }
 
-    long fsize = 0l;
+    //long fsize = 0l;
 
     public Flux start(int sliceSize) {
         logger.info("Within transfer start");
@@ -71,7 +70,6 @@ public class Transfer<S extends Resource, D extends Resource> {
                     logger.info("Transfer started....");
                     this.startTime = Time.now();
                 })
-
                 .parallel(setParallelism())
                 .runOn(Schedulers.elastic())
                 .flatMap(file -> {
@@ -123,7 +121,7 @@ public class Transfer<S extends Resource, D extends Resource> {
         double totalSize = 0.0;
 
         for (EntityInfo ei : filesToTransfer) {
-            System.out.println(ei.getPath()+"--"+ei.getSize());
+            System.out.println(ei.getPath() + "--" + ei.getSize());
             totalSize += ei.getSize();
         }
         totalSize /= 1024;

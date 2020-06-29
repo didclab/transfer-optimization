@@ -10,6 +10,7 @@ import org.onedatashare.transfer.resource.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import static org.onedatashare.transfer.model.credential.CredentialConstants.*;
 
 @Service
 public class TransferService {
+
     @Autowired
     private CredentialService credentialService;
 
